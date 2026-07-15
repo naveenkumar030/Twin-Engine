@@ -45,7 +45,11 @@ public class SimulationService {
             }
         }
 
-        int[] years = {2024, 2027, 2030, 2034, 2039, 2044};
+        int numYears = 21; // 20 years projection
+        int[] years = new int[numYears];
+        for (int i = 0; i < numYears; i++) {
+            years[i] = currentYear + i;
+        }
         double[] baselines = new double[years.length];
 
         for (int i = 0; i < years.length; i++) {

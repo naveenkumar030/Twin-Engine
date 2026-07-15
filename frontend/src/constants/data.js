@@ -12,6 +12,7 @@ import {
   ShieldPlus,
   Wallet,
   LayoutDashboard,
+  PiggyBank,
 } from "lucide-react";
 import { C } from "./theme";
 
@@ -21,6 +22,7 @@ export const navItems = [
   { key: "retirement", label: "Retirement", icon: LineChartIcon },
   { key: "portfolio", label: "Portfolio", icon: Landmark },
   { key: "cashflow", label: "Cash Flow", icon: Wallet },
+  { key: "budget", label: "Budget", icon: PiggyBank },
   { key: "insights", label: "Insights", icon: Brain },
   { key: "settings", label: "Settings", icon: Settings },
 ];

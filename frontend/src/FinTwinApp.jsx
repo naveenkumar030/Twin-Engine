@@ -9,6 +9,7 @@ import SettingsPage from "./pages/SettingsPage";
 import InsightsPage from "./pages/InsightsPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import CashFlowPage from "./pages/CashFlowPage";
+import BudgetPage from "./pages/BudgetPage";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import { fetchUserSettings, fetchInsights } from "./services/api";
@@ -222,6 +223,8 @@ export default function FinTwinApp() {
               <PortfolioPage {...commonProps} />
             ) : tab === "cashflow" ? (
               <CashFlowPage {...commonProps} />
+            ) : tab === "budget" ? (
+              <BudgetPage {...commonProps} />
             ) : (
               <RetirementPage {...commonProps} />
             )}

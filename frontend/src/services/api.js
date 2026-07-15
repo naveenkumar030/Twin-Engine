@@ -1,27 +1,27 @@
 const BASE_URL = "http://localhost:8080/api";
 
-export async function loginUser(username, password) {
+export async function loginUser(email, password) {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ email, password }),
   });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Invalid username or password");
+    throw new Error(errorData.message || "Invalid email or password");
   }
   return await response.json();
 }
 
-export async function registerUser(username, password, email) {
+export async function registerUser(email, password, username) {
   const response = await fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username, password, email }),
+    body: JSON.stringify({ email, password, username }),
   });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
@@ -185,24 +185,29 @@ function fallbackProjection(profile) {
 }
 
 function fallbackSimulation(selectedEvent, amount, months, downpaymentPct = 30, loanInterestRate = 8.5) {
-  const years = [2024, 2027, 2030, 2034, 2039, 2044];
-  const baselines = [0.6, 1.2, 1.9, 2.9, 4.0, 5.1];
-  const costCr = amount / 10000000;
-  const eventYear = 2024 + Math.round(months / 12);
+  const currentYear = 2024;
+  const eventYear = currentYear + Math.round(months / 12);
+  const currentWealth = 0.6; // 60 Lakhs baseline in Cr
+  const returnRate = 10; // 10% default return
 
-  const wealthProjection = years.map((year, idx) => {
-    let simulated = baselines[idx];
+  const wealthProjection = [];
+  for (let i = 0; i <= 20; i++) {
+    const year = currentYear + i;
+    const baseline = +(currentWealth * Math.pow(1 + returnRate / 100, i)).toFixed(2);
+    let simulated = baseline;
+
     if (year >= eventYear) {
       const yearsCompounded = year - eventYear;
       const downpaymentAmt = amount * (downpaymentPct / 100.0);
       const loanAmt = amount * (1.0 - downpaymentPct / 100.0);
-      const downpaymentDrag = (downpaymentAmt / 10000000.0) * Math.pow(1.075, yearsCompounded);
-      const loanDrag = (loanAmt / 10000000.0) * Math.pow(1.0 + loanInterestRate / 100.0, yearsCompounded);
+      const downpaymentDrag = (downpaymentAmt / 10000000.0) * Math.pow(1 + returnRate / 100, yearsCompounded);
+      const loanDrag = (loanAmt / 10000000.0) * Math.pow(1 + loanInterestRate / 100.0, yearsCompounded);
       const totalDrag = downpaymentDrag + loanDrag;
-      simulated = Math.max(0, +(baselines[idx] - totalDrag).toFixed(2));
+      simulated = Math.max(0, +(baseline - totalDrag).toFixed(2));
     }
-    return { year, baseline: baselines[idx], simulated };
-  });
+    
+    wealthProjection.push({ year, baseline, simulated });
+  }
 
   const costLakhs = amount / 100000;
   const lossAmountLakhs = +(costLakhs * 1.47).toFixed(1);

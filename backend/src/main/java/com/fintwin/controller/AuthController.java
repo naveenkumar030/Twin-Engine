@@ -24,21 +24,25 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Username is required"));
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Email is required"));
         }
         if (user.getPassword() == null || user.getPassword().length() < 4) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Password must be at least 4 characters"));
         }
 
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername().trim());
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail().trim());
         if (existingUser.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Username already exists"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Email already exists"));
         }
 
         // Hash password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setUsername(user.getUsername().trim());
+        user.setEmail(user.getEmail().trim());
+        // Default username to email if it's not provided
+        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+            user.setUsername(user.getEmail());
+        }
         
         User savedUser = userRepository.save(user);
         savedUser.setPassword(""); // blank out password for response
@@ -47,18 +51,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {
-        if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Username and password are required"));
+        if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Email and password are required"));
         }
 
-        Optional<User> userOpt = userRepository.findByUsername(loginRequest.getUsername().trim());
+        Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail().trim());
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(createMessage("Invalid username or password"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(createMessage("Invalid email or password"));
         }
 
         User user = userOpt.get();
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(createMessage("Invalid username or password"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(createMessage("Invalid email or password"));
         }
 
         user.setPassword(""); // blank out password for response
