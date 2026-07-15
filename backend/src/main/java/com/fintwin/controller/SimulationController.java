@@ -28,8 +28,8 @@ public class SimulationController {
     private SimulationScenarioRepository simulationScenarioRepository;
 
     @PostMapping("/project")
-    public SimulationResponse runSimulation(@RequestBody SimulationRequest request) {
-        return simulationService.runSimulation(request);
+    public SimulationResponse runSimulation(@RequestParam(required = false) String userId, @RequestBody SimulationRequest request) {
+        return simulationService.runSimulation(userId, request);
     }
 
     @GetMapping("/scenarios")

@@ -2,6 +2,9 @@ package com.fintwin.service;
 
 import com.fintwin.model.SimulationRequest;
 import com.fintwin.model.SimulationResponse;
+import com.fintwin.repository.PortfolioHoldingRepository;
+import com.fintwin.model.PortfolioHolding;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -12,34 +15,62 @@ import java.util.List;
 @Service
 public class SimulationService {
 
-    public SimulationResponse runSimulation(SimulationRequest request) {
+    @Autowired
+    private PortfolioHoldingRepository holdingRepository;
+
+    public SimulationResponse runSimulation(String userId, SimulationRequest request) {
         // 1. Generate dynamic wealth points
         List<SimulationResponse.WealthPoint> points = new ArrayList<>();
         int currentYear = 2024;
         double costCr = request.getAmount() / 10000000.0;
         int eventYear = currentYear + (int) Math.round(request.getMonths() / 12.0);
 
-        // Baseline progression
+        // Fetch real-time values from portfolio
+        double currentWealth = 6000000.0; // Default 60 Lakhs (0.6 Cr)
+        double weightedReturnRate = 10.0; // Default 10%
+        
+        if (userId != null && !userId.isEmpty()) {
+            List<PortfolioHolding> holdings = holdingRepository.findByUserId(userId);
+            if (holdings != null && !holdings.isEmpty()) {
+                double totalWealth = 0;
+                double totalWeightedReturn = 0;
+                for (PortfolioHolding holding : holdings) {
+                    totalWealth += holding.getAmount();
+                    totalWeightedReturn += holding.getAmount() * holding.getGrowthRate();
+                }
+                if (totalWealth > 0) {
+                    currentWealth = totalWealth;
+                    weightedReturnRate = totalWeightedReturn / totalWealth;
+                }
+            }
+        }
+
         int[] years = {2024, 2027, 2030, 2034, 2039, 2044};
-        double[] baselines = {0.6, 1.2, 1.9, 2.9, 4.0, 5.1};
+        double[] baselines = new double[years.length];
 
         for (int i = 0; i < years.length; i++) {
             int year = years[i];
-            double baseline = baselines[i];
-            double simulated = baseline;
+            int yearsFromNow = year - currentYear;
+            
+            // Compound wealth
+            double projectedWealth = currentWealth * Math.pow(1.0 + (weightedReturnRate / 100.0), yearsFromNow);
+            double baselineCr = projectedWealth / 10000000.0;
+            baselines[i] = round(baselineCr, 2);
+            
+            double simulated = baselines[i];
 
             if (year >= eventYear) {
                 int yearsCompounded = year - eventYear;
                 double downpaymentAmt = request.getAmount() * (request.getDownpaymentPct() / 100.0);
                 double loanAmt = request.getAmount() * (1.0 - request.getDownpaymentPct() / 100.0);
                 
-                double downpaymentDrag = (downpaymentAmt / 10000000.0) * Math.pow(1.075, yearsCompounded);
+                double downpaymentDrag = (downpaymentAmt / 10000000.0) * Math.pow(1.0 + (weightedReturnRate / 100.0), yearsCompounded); // Opportunity cost
                 double loanDrag = (loanAmt / 10000000.0) * Math.pow(1.0 + request.getLoanInterestRate() / 100.0, yearsCompounded);
                 
                 double totalDrag = downpaymentDrag + loanDrag;
-                simulated = Math.max(0.0, round(baseline - totalDrag, 2));
+                simulated = Math.max(0.0, round(baselines[i] - totalDrag, 2));
             }
-            points.add(new SimulationResponse.WealthPoint(year, baseline, simulated));
+            points.add(new SimulationResponse.WealthPoint(year, baselines[i], simulated));
         }
 
         // 2. Calculate dynamic impact details

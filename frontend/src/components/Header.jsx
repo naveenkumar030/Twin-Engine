@@ -1,68 +1,97 @@
 import React from "react";
-import { Menu, Search, ShieldCheck, Bell, Wallet } from "lucide-react";
+import { Menu, ShieldCheck, Bell, Activity } from "lucide-react";
 import { C } from "../constants/theme";
 
-export default function Header({ title, showSearch, onMenuToggle, healthScore = 840 }) {
+export default function Header({ title, onMenuToggle, healthScore = 840, darkMode, userId }) {
+  const scoreColor =
+    healthScore >= 850 ? "#10b981" :
+    healthScore >= 700 ? "#6366f1" :
+    healthScore >= 500 ? "#f59e0b" : "#ef4444";
+
+  const scoreLabel =
+    healthScore >= 850 ? "Outstanding" :
+    healthScore >= 700 ? "Strong" :
+    healthScore >= 500 ? "Moderate" : "Vulnerable";
+
+  const initials = userId ? userId.slice(0, 2).toUpperCase() : "FT";
+
   return (
     <header
-      className="w-full sticky top-0 z-40 backdrop-blur-xl border-b shadow-sm flex justify-between items-center px-6 md:px-10 py-4"
-      style={{ background: "rgba(248,249,255,0.8)", borderColor: "rgba(197,197,211,0.3)" }}
+      className="w-full sticky top-0 z-40 border-b flex justify-between items-center px-5 md:px-8 py-3.5"
+      style={{
+        background: darkMode
+          ? "rgba(15, 23, 42, 0.9)"
+          : "rgba(250, 250, 252, 0.85)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderColor: darkMode ? "rgba(51, 65, 85, 0.5)" : "rgba(228, 228, 231, 0.6)",
+      }}
     >
+      {/* Left: Menu + Title */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuToggle}
-          className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors active:scale-95"
-          style={{ color: C.onSurfaceVariant }}
+          className="md:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
+          style={{ color: darkMode ? "#94a3b8" : C.onSurfaceVariant }}
         >
           <Menu size={20} />
         </button>
-        {showSearch ? (
-          <div className="relative w-full max-w-md hidden md:block">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2"
-              style={{ color: C.outline }}
-            />
-            <input
-              className="w-full pl-10 pr-4 py-2 rounded-lg border outline-none text-sm"
-              style={{ borderColor: "rgba(197,197,211,0.5)", background: C.surfaceContainerLowest }}
-              placeholder="Search scenarios, assets..."
-              type="text"
-            />
-          </div>
-        ) : (
-          <h2 className="hidden md:block text-2xl font-bold" style={{ color: C.primary }}>
+        <div>
+          <h2
+            className="hidden md:block text-xl font-bold tracking-tight"
+            style={{ color: darkMode ? "#f1f5f9" : C.primary }}
+          >
             {title}
           </h2>
-        )}
+        </div>
       </div>
-      <div className="flex items-center gap-6">
+
+      {/* Right: Score + Avatar */}
+      <div className="flex items-center gap-3">
+        {/* Health Score Pill */}
         <div
-          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border"
-          style={{ background: C.surfaceContainer, borderColor: "rgba(197,197,211,0.3)" }}
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold"
+          style={{
+            background: darkMode ? "rgba(15,23,42,0.6)" : "rgba(248,249,255,0.9)",
+            borderColor: darkMode ? "rgba(51,65,85,0.6)" : "rgba(228,228,231,0.8)",
+            color: darkMode ? "#f1f5f9" : C.primary,
+          }}
         >
-          <ShieldCheck size={18} style={{ color: C.tertiaryFixedDim }} />
-          <span className="text-sm font-semibold" style={{ color: C.primary }}>
-            Health Score: {healthScore}
+          <ShieldCheck size={14} style={{ color: scoreColor }} />
+          <span>
+            <span style={{ color: scoreColor }}>{healthScore}</span>
+            <span className="text-slate-400 font-medium"> · {scoreLabel}</span>
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="p-2 rounded-full relative" style={{ color: C.onSurfaceVariant }}>
-            <Bell size={20} />
-            <span
-              className="absolute top-2 right-2 w-2 h-2 rounded-full"
-              style={{ background: C.error }}
-            />
-          </button>
-          <button className="p-2 rounded-full" style={{ color: C.onSurfaceVariant }}>
-            <Wallet size={20} />
-          </button>
-        </div>
-        <div
-          className="w-10 h-10 rounded-full border-2 overflow-hidden flex items-center justify-center font-semibold text-sm"
-          style={{ borderColor: C.surfaceContainerHigh, background: C.primaryContainer, color: "#fff" }}
+
+        {/* Notification Bell */}
+        <button
+          className="relative p-2 rounded-xl transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+          style={{ color: darkMode ? "#64748b" : "#94a3b8" }}
         >
-          AK
+          <Bell size={18} />
+          <span
+            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full border border-white dark:border-slate-900"
+            style={{ background: "#ef4444" }}
+          />
+        </button>
+
+        {/* Activity indicator */}
+        <button
+          className="hidden md:flex p-2 rounded-xl transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+          style={{ color: darkMode ? "#64748b" : "#94a3b8" }}
+        >
+          <Activity size={18} />
+        </button>
+
+        {/* User Avatar */}
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-md"
+          style={{
+            background: `linear-gradient(135deg, ${C.secondary}, ${C.secondaryContainer})`,
+          }}
+        >
+          {initials}
         </div>
       </div>
     </header>

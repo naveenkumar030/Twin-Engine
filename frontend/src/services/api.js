@@ -104,9 +104,12 @@ export async function fetchRetirementAllocation(userId) {
   }
 }
 
-export async function fetchSimulationResult(selectedEvent, amount, months, downpaymentPct, loanInterestRate) {
+export async function fetchSimulationResult(userId, selectedEvent, amount, months, downpaymentPct, loanInterestRate) {
   try {
-    const response = await fetch(`${BASE_URL}/simulator/project`, {
+    const url = userId 
+      ? `${BASE_URL}/simulator/project?userId=${encodeURIComponent(userId)}`
+      : `${BASE_URL}/simulator/project`;
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

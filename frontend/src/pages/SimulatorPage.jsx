@@ -24,8 +24,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
 
   // Fetch simulation calculation
   useEffect(() => {
-    fetchSimulationResult(selectedEvent, amount, months, downpaymentPct, loanInterestRate).then(setSimulationData);
-  }, [selectedEvent, amount, months, downpaymentPct, loanInterestRate]);
+    fetchSimulationResult(userId, selectedEvent, amount, months, downpaymentPct, loanInterestRate).then(setSimulationData);
+  }, [userId, selectedEvent, amount, months, downpaymentPct, loanInterestRate]);
 
   // Load saved scenarios from MongoDB
   const loadScenarios = () => {

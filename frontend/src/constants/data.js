@@ -11,10 +11,12 @@ import {
   Repeat,
   ShieldPlus,
   Wallet,
+  LayoutDashboard,
 } from "lucide-react";
 import { C } from "./theme";
 
 export const navItems = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "simulator", label: "Simulator", icon: BrainCog },
   { key: "retirement", label: "Retirement", icon: LineChartIcon },
   { key: "portfolio", label: "Portfolio", icon: Landmark },
@@ -23,10 +25,28 @@ export const navItems = [
   { key: "settings", label: "Settings", icon: Settings },
 ];
 
+export const ASSET_CATEGORIES = [
+  "Stocks",
+  "Mutual Funds",
+  "ETFs",
+  "Gold",
+  "Crypto",
+  "Fixed Deposits",
+  "Bonds",
+  "REITs",
+  "Real Estate",
+  "Cash",
+  "EPF",
+  "PPF",
+  "NPS",
+  "Equity",
+  "Debt",
+];
+
 export function projectionData() {
   const data = [];
-  let corpus = 120000000; // 12 Cr
-  let withdrawal = 4800000; // 48L
+  let corpus = 120000000;
+  let withdrawal = 4800000;
   const inflation = 1.06;
   const ret = 1.08;
   for (let age = 60; age <= 90; age++) {
