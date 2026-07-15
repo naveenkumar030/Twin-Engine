@@ -1,0 +1,17 @@
+# Build directories
+target/
+dist/
+**/target/
+**/dist/
+
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# OS/IDE files
+.idea/
+.vscode/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
