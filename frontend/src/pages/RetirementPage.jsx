@@ -12,7 +12,7 @@ import { C, getScoreColor } from "../constants/theme";
 import {
   fetchRetirementProjection, fetchRetirementAllocation,
   fetchRetirementProfile, saveRetirementProfile,
-  fetchUserSettings, saveUserSettings,
+  fetchUserSettings, saveUserSettings, fetchHoldings,
 } from "../services/api";
 import Header from "../components/Header";
 import Milestone from "../components/Milestone";
@@ -60,8 +60,8 @@ export default function RetirementPage({ userId, currency = "₹", onMenuToggle,
   const [scenario, setScenario] = useState("moderate");
 
   const [profile, setProfile] = useState({
-    startingCorpus: 120000000.0,
-    startingWithdrawal: 4800000.0,
+    startingCorpus: 0.0,
+    startingWithdrawal: 0.0,
     inflationRate: 0.06,
     returnRate: 0.11,
   });
@@ -88,28 +88,77 @@ export default function RetirementPage({ userId, currency = "₹", onMenuToggle,
 
   useEffect(() => {
     if (userId) {
-      fetchRetirementProfile(userId).then((prof) => { if (prof) setProfile(prof); });
-      fetchUserSettings(userId).then((settings) => {
+      Promise.all([
+        fetchRetirementProfile(userId),
+        fetchUserSettings(userId),
+        fetchRetirementAllocation(userId),
+        fetchHoldings(userId)
+      ]).then(([prof, settings, alloc, holds]) => {
         if (settings) {
           if (settings.targetRetirementAge) setTargetAge(settings.targetRetirementAge);
           if (settings.currentAge) setCurrentAge(settings.currentAge);
         }
+        if (alloc) setAllocData(alloc);
+        const totalValue = holds ? holds.reduce((s, h) => s + h.amount, 0) : 0;
+        if (prof) {
+          prof.startingCorpus = totalValue;
+          setProfile(prof);
+        } else {
+          setProfile({
+            startingCorpus: totalValue,
+            startingWithdrawal: 0,
+            inflationRate: 0.06,
+            returnRate: 0.11,
+          });
+        }
       });
-      fetchRetirementAllocation(userId).then(setAllocData);
     }
   }, [userId]);
 
+  const saveTimeoutRef = useRef(null);
+
   useEffect(() => {
     if (userId && profile) {
-      fetchRetirementProjection(userId, profile).then(setData);
+      // Calculate local projection instantly for smooth UI
+      const localData = [];
+      let corpus = profile.startingCorpus;
+      let withdrawal = profile.startingWithdrawal;
+      const inflation = 1 + profile.inflationRate;
+      const ret = 1 + profile.returnRate;
+      for (let age = 60; age <= 90; age++) {
+        localData.push({
+          age,
+          corpus: +(corpus / 10000000.0).toFixed(2),
+          withdrawal: +(withdrawal / 100000.0).toFixed(1),
+        });
+        corpus = Math.max(0.0, (corpus - withdrawal) * ret);
+        withdrawal *= inflation;
+      }
+      setData(localData);
+
+      // Debounce the backend call to avoid spamming the database
+      const fetchTimeout = setTimeout(() => {
+        fetchRetirementProjection(userId, profile).then((res) => {
+          if (res) setData(res);
+        });
+      }, 500);
+
+      return () => clearTimeout(fetchTimeout);
     }
   }, [userId, profile]);
 
   const updateProfileField = useCallback((key, val) => {
     const updated = { ...profile, [key]: val };
     setProfile(updated);
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
     if (userId) {
-      saveRetirementProfile(userId, updated).then(() => toast.success("Profile saved!"));
+      saveTimeoutRef.current = setTimeout(() => {
+        saveRetirementProfile(userId, updated).then(() => toast.success("Profile saved!"));
+      }, 500);
     }
   }, [profile, userId]);
 
@@ -169,12 +218,30 @@ export default function RetirementPage({ userId, currency = "₹", onMenuToggle,
   const coastFireNumber = fireNumber / Math.pow(1 + returnRate, yearsToRetirement);
 
   // FI Date prediction
-  const monthsToFI = Math.ceil(
-    Math.log((targetCorpus * monthlyRate + totalMonthlyContrib) / (startingCorpus * monthlyRate + totalMonthlyContrib))
-    / Math.log(1 + monthlyRate)
-  );
+  let monthsToFI = 0;
+  const denominator = startingCorpus * monthlyRate + totalMonthlyContrib;
+  const numerator = targetCorpus * monthlyRate + totalMonthlyContrib;
+  if (targetCorpus <= startingCorpus) {
+    monthsToFI = 0;
+  } else if (denominator <= 0 || numerator <= 0 || monthlyRate <= 0) {
+    const gap = targetCorpus - startingCorpus;
+    if (totalMonthlyContrib > 0) {
+      monthsToFI = Math.ceil(gap / totalMonthlyContrib);
+    } else {
+      monthsToFI = 999 * 12; // Far future / impossible
+    }
+  } else {
+    const ratio = numerator / denominator;
+    const logRatio = Math.log(ratio);
+    const logRate = Math.log(1 + monthlyRate);
+    monthsToFI = logRate > 0 ? Math.ceil(logRatio / logRate) : 999 * 12;
+  }
+
+  // Cap monthsToFI to a reasonable value like 100 years, and prevent NaN/Infinity
+  const finalMonthsToFI = Math.min(100 * 12, Math.max(0, isNaN(monthsToFI) || !isFinite(monthsToFI) ? 999 * 12 : monthsToFI));
+
   const fiDate = new Date();
-  fiDate.setMonth(fiDate.getMonth() + Math.max(0, monthsToFI));
+  fiDate.setMonth(fiDate.getMonth() + finalMonthsToFI);
 
   // Readiness score
   const readinessScore = Math.min(100, Math.round(
@@ -393,9 +460,19 @@ export default function RetirementPage({ userId, currency = "₹", onMenuToggle,
               </div>
             </div>
 
+            {/* Current Corpus (Synced) */}
+            <div className="space-y-1.5 border-b pb-3 mb-2" style={{ borderColor: cardBorder }}>
+              <div className="flex justify-between text-xs">
+                <span className="font-bold uppercase tracking-widest text-slate-400">Current Corpus (Synced)</span>
+                <span className="font-extrabold text-indigo-500">{formatCurrency(startingCorpus, currency)}</span>
+              </div>
+              <p className="text-[9px] text-slate-400 font-semibold leading-relaxed">
+                Connected to your asset portfolio. Manage holdings in the Portfolio page to update this value.
+              </p>
+            </div>
+
             {/* Sliders */}
             {[
-              { label: "Current Corpus", key: "startingCorpus", min: 500000, max: 300000000, step: 500000, display: formatCurrency(startingCorpus, currency) },
               { label: "Annual Income Need", key: "startingWithdrawal", min: 200000, max: 25000000, step: 100000, display: formatCurrency(startingWithdrawal, currency) },
               { label: "Return Rate", key: "returnRate", min: 4, max: 20, step: 1, isRate: true, display: `${Math.round(returnRate * 100)}%` },
               { label: "Inflation Rate", key: "inflationRate", min: 3, max: 12, step: 1, isRate: true, display: `${Math.round(inflationRate * 100)}%` },

@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/portfolio")
@@ -21,21 +18,7 @@ public class PortfolioController {
 
     @GetMapping("/holdings")
     public List<PortfolioHolding> getHoldings(@RequestParam String userId) {
-        List<PortfolioHolding> holdings = portfolioHoldingRepository.findByUserId(userId);
-        if (holdings.isEmpty()) {
-            // Prepopulate realistic starting sample portfolio holdings
-            List<PortfolioHolding> defaults = new ArrayList<>();
-            defaults.add(new PortfolioHolding(null, userId, "HDFC Index Nifty 50 Fund", "Equity", 6500000.0, 12.0));
-            defaults.add(new PortfolioHolding(null, userId, "SBI Corporate Bond Fund", "Debt", 2500000.0, 6.8));
-            defaults.add(new PortfolioHolding(null, userId, "Sovereign Gold Bond (SGB)", "Gold", 500000.0, 8.0));
-            defaults.add(new PortfolioHolding(null, userId, "DLF Real Estate REIT", "Real Estate", 500000.0, 9.5));
-
-            for (PortfolioHolding h : defaults) {
-                portfolioHoldingRepository.save(h);
-            }
-            holdings = portfolioHoldingRepository.findByUserId(userId);
-        }
-        return holdings;
+        return portfolioHoldingRepository.findByUserId(userId);
     }
 
     @PostMapping("/holdings")
@@ -46,6 +29,11 @@ public class PortfolioController {
 
     @DeleteMapping("/holdings/{id}")
     public ResponseEntity<?> deleteHolding(@PathVariable String id, @RequestParam String userId) {
+        Optional<PortfolioHolding> holding = portfolioHoldingRepository.findByIdAndUserId(id, userId);
+        if (holding.isEmpty()) {
+            return ResponseEntity.status(404).body(createMessage("Holding not found"));
+        }
+
         portfolioHoldingRepository.deleteById(id);
         Map<String, String> res = new HashMap<>();
         res.put("message", "Holding deleted successfully");
@@ -86,10 +74,17 @@ public class PortfolioController {
                 else if (h.contains("rate") || h.contains("growth") || h.contains("return")) rateIdx = i;
             }
 
-            if (nameIdx == -1) nameIdx = 0;
-            if (catIdx == -1) catIdx = 1;
-            if (amtIdx == -1) amtIdx = 2;
-            if (rateIdx == -1) rateIdx = 3;
+            // Safe fallbacks to prevent index collisions
+            Set<Integer> usedIndices = new HashSet<>();
+            if (nameIdx != -1) usedIndices.add(nameIdx);
+            if (catIdx != -1) usedIndices.add(catIdx);
+            if (amtIdx != -1) usedIndices.add(amtIdx);
+            if (rateIdx != -1) usedIndices.add(rateIdx);
+
+            if (nameIdx == -1) { nameIdx = findUnusedIndex(usedIndices, 0); usedIndices.add(nameIdx); }
+            if (catIdx == -1) { catIdx = findUnusedIndex(usedIndices, 1); usedIndices.add(catIdx); }
+            if (amtIdx == -1) { amtIdx = findUnusedIndex(usedIndices, 2); usedIndices.add(amtIdx); }
+            if (rateIdx == -1) { rateIdx = findUnusedIndex(usedIndices, 3); usedIndices.add(rateIdx); }
 
             List<PortfolioHolding> holdingsToSave = new ArrayList<>();
             String line;
@@ -174,5 +169,13 @@ public class PortfolioController {
         Map<String, String> map = new HashMap<>();
         map.put("message", message);
         return map;
+    }
+
+    private int findUnusedIndex(Set<Integer> used, int preferred) {
+        int idx = preferred;
+        while (used.contains(idx)) {
+            idx++;
+        }
+        return idx;
     }
 }

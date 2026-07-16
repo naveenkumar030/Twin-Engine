@@ -34,9 +34,9 @@ public class SettingsController {
                     UserSettings defaultSettings = new UserSettings(
                             null,
                             userId,
-                            "₹",
+                            "\u20B9",
                             60,
-                            42,
+                            30,
                             65.0,
                             25.0,
                             5.0,
@@ -70,7 +70,14 @@ public class SettingsController {
         String password = profileUpdate.get("password");
 
         if (email != null && !email.trim().isEmpty()) {
-            user.setEmail(email.trim());
+            String newEmail = email.trim();
+            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
+                Optional<User> existingEmailUser = userRepository.findByEmail(newEmail);
+                if (existingEmailUser.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createMessage("Email already exists"));
+                }
+                user.setEmail(newEmail);
+            }
         }
 
         if (password != null && !password.trim().isEmpty()) {

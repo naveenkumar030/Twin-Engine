@@ -1,11 +1,24 @@
+export const BRAND_PALETTE = {
+  50: "#a9d6e5",
+  100: "#89c2d9",
+  200: "#61a5c2",
+  300: "#468faf",
+  400: "#2c7da0",
+  500: "#2a6f97",
+  600: "#014f86",
+  700: "#01497c",
+  800: "#013a63",
+  900: "#012a4a",
+};
+
 // ---------- Design tokens - Light + Dark Mode ----------
 export const C = {
   primary: "#0f172a",
-  primaryFixed: "#e0e7ff",
-  primaryContainer: "#1e1b4b",
-  onPrimaryContainer: "#a5b4fc",
-  secondary: "#6366f1",
-  secondaryContainer: "#4f46e5",
+  primaryFixed: BRAND_PALETTE[100],
+  primaryContainer: BRAND_PALETTE[900],
+  onPrimaryContainer: BRAND_PALETTE[50],
+  secondary: BRAND_PALETTE[500],
+  secondaryContainer: BRAND_PALETTE[600],
   onSecondaryContainer: "#ffffff",
   tertiaryContainer: "#064e3b",
   onTertiaryContainer: "#10b981",
@@ -17,7 +30,7 @@ export const C = {
   surfaceContainer: "#e4e4e7",
   surfaceContainerHigh: "#d4d4d8",
   surfaceContainerHighest: "#a1a1aa",
-  surfaceTint: "#6366f1",
+  surfaceTint: BRAND_PALETTE[500],
   onSurface: "#09090b",
   onSurfaceVariant: "#52525b",
   onBackground: "#09090b",
@@ -36,9 +49,9 @@ export const C = {
 // Dark mode tokens (used when .dark class is on html)
 export const CD = {
   primary: "#f1f5f9",
-  primaryContainer: "#312e81",
-  secondary: "#818cf8",
-  secondaryContainer: "#6366f1",
+  primaryContainer: BRAND_PALETTE[800],
+  secondary: BRAND_PALETTE[400],
+  secondaryContainer: BRAND_PALETTE[500],
   surface: "#0f172a",
   surfaceBright: "#1e293b",
   surfaceContainerLowest: "#1e293b",

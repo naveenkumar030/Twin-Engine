@@ -8,7 +8,7 @@ public class UserSettings {
     @Id
     private String id;
     private String userId;
-    private String currency = "₹";
+    private String currency = "\u20B9";
     private int targetRetirementAge = 60;
     private int currentAge = 42;
     private double equityAllocation = 65.0;

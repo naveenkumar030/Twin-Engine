@@ -60,20 +60,20 @@ export default function BudgetPage({ userId, currency = "₹", onMenuToggle, hea
   const [transactions, setTransactions] = useState([]);
 
   // Configurable inputs
-  const [monthlyIncome, setMonthlyIncome] = useState(150000);
-  const [monthlyBudgetLimit, setMonthlyBudgetLimit] = useState(80000);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
+  const [monthlyBudgetLimit, setMonthlyBudgetLimit] = useState(0);
 
   // Category allocations (absolute values)
   const [categories, setCategories] = useState({
-    Housing: 28000, // 35% of 80000
-    "Groceries/Food": 16000, // 20%
-    "Utilities/Bills": 12000, // 15%
-    "Entertainment/Lifestyle": 12000, // 15%
-    Transport: 12000, // 15%
+    Housing: 0,
+    "Groceries/Food": 0,
+    "Utilities/Bills": 0,
+    "Entertainment/Lifestyle": 0,
+    Transport: 0,
   });
 
   // What-if simulator
-  const [simulatedSavingsRate, setSimulatedSavingsRate] = useState(46);
+  const [simulatedSavingsRate, setSimulatedSavingsRate] = useState(0);
 
   // ── API Loading ──
   useEffect(() => {
@@ -86,21 +86,58 @@ export default function BudgetPage({ userId, currency = "₹", onMenuToggle, hea
         fetchTransactions(userId)
       ])
         .then(([prof, setts, holds, txs]) => {
-          if (prof) setProfile(prof);
+          const totalValue = holds ? holds.reduce((s, h) => s + h.amount, 0) : 0;
+          if (prof) {
+            prof.startingCorpus = totalValue;
+            setProfile(prof);
+          } else {
+            setProfile({
+              startingCorpus: totalValue,
+              startingWithdrawal: 0,
+              inflationRate: 0.06,
+              returnRate: 0.08,
+            });
+          }
           if (setts) {
             setSettings(setts);
           }
           if (holds) setHoldings(holds);
           if (txs) setTransactions(txs);
 
-          // Attempt to extract typical income from profile or user settings if possible
-          // Defaulting to 150000 as typical, but if transactions contain a Salary, use that.
-          const salaryTx = txs?.filter(t => t.type === "INCOME" && t.category === "Salary");
-          if (salaryTx && salaryTx.length > 0) {
-            // Take the average salary or the latest
-            const latestSalary = salaryTx[salaryTx.length - 1].amount;
-            setMonthlyIncome(latestSalary);
-            setMonthlyBudgetLimit(Math.round(latestSalary * 0.55)); // 55% as default budget
+          // Get latest month represented in transactions
+          const dates = txs?.map(t => new Date(t.date)).filter(d => !isNaN(d));
+          let latestMonthStr = null;
+          if (dates && dates.length > 0) {
+            const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+            latestMonthStr = maxDate.toLocaleString("default", { month: "short", year: "2-digit" });
+          }
+
+          // Calculate actual typical income in latest month or default to 0
+          const latestMonthIncome = txs?.filter(t => {
+            if (t.type !== "INCOME") return false;
+            try {
+              const d = new Date(t.date);
+              if (isNaN(d)) return false;
+              return d.toLocaleString("default", { month: "short", year: "2-digit" }) === latestMonthStr;
+            } catch {
+              return false;
+            }
+          }).reduce((sum, t) => sum + t.amount, 0) || 0;
+
+          if (latestMonthIncome > 0) {
+            setMonthlyIncome(latestMonthIncome);
+            setMonthlyBudgetLimit(Math.round(latestMonthIncome * 0.55));
+          } else {
+            // Check if there is any income at all in transactions
+            const salaryTx = txs?.filter(t => t.type === "INCOME");
+            if (salaryTx && salaryTx.length > 0) {
+              const avgIncome = Math.round(salaryTx.reduce((sum, t) => sum + t.amount, 0) / salaryTx.length);
+              setMonthlyIncome(avgIncome);
+              setMonthlyBudgetLimit(Math.round(avgIncome * 0.55));
+            } else {
+              setMonthlyIncome(0);
+              setMonthlyBudgetLimit(0);
+            }
           }
         })
         .catch(err => console.error("Error loading budget context:", err))
@@ -110,21 +147,32 @@ export default function BudgetPage({ userId, currency = "₹", onMenuToggle, hea
 
   // Adjust categories when monthlyBudgetLimit changes
   useEffect(() => {
-    // Proportional distribution based on current weights
-    const totalCurrentCats = Object.values(categories).reduce((sum, v) => sum + v, 0) || 1;
+    const totalCurrentCats = Object.values(categories).reduce((sum, v) => sum + v, 0);
     const scaled = {};
-    Object.keys(categories).forEach(key => {
-      const weight = categories[key] / totalCurrentCats;
-      scaled[key] = Math.round(monthlyBudgetLimit * weight);
-    });
+    if (totalCurrentCats === 0) {
+      scaled["Housing"] = Math.round(monthlyBudgetLimit * 0.35);
+      scaled["Groceries/Food"] = Math.round(monthlyBudgetLimit * 0.20);
+      scaled["Utilities/Bills"] = Math.round(monthlyBudgetLimit * 0.15);
+      scaled["Entertainment/Lifestyle"] = Math.round(monthlyBudgetLimit * 0.15);
+      scaled["Transport"] = Math.round(monthlyBudgetLimit * 0.15);
+    } else {
+      Object.keys(categories).forEach(key => {
+        const weight = categories[key] / totalCurrentCats;
+        scaled[key] = Math.round(monthlyBudgetLimit * weight);
+      });
+    }
     setCategories(scaled);
   }, [monthlyBudgetLimit]);
 
   // Update simulated savings rate when income/budget limit changes initially
   useEffect(() => {
-    const plannedSavings = Math.max(0, monthlyIncome - monthlyBudgetLimit);
-    const rate = Math.round((plannedSavings / monthlyIncome) * 100) || 0;
-    setSimulatedSavingsRate(rate);
+    if (monthlyIncome > 0) {
+      const plannedSavings = Math.max(0, monthlyIncome - monthlyBudgetLimit);
+      const rate = Math.round((plannedSavings / monthlyIncome) * 100) || 0;
+      setSimulatedSavingsRate(rate);
+    } else {
+      setSimulatedSavingsRate(0);
+    }
   }, [monthlyIncome, monthlyBudgetLimit]);
 
   // Handle single category adjustment
@@ -380,7 +428,7 @@ export default function BudgetPage({ userId, currency = "₹", onMenuToggle, hea
                 <div className="mt-3">
                   <input
                     type="range"
-                    min="50000"
+                    min="0"
                     max="500000"
                     step="5000"
                     value={monthlyIncome}
@@ -401,8 +449,8 @@ export default function BudgetPage({ userId, currency = "₹", onMenuToggle, hea
                 <div className="mt-3">
                   <input
                     type="range"
-                    min="10000"
-                    max={monthlyIncome}
+                    min="0"
+                    max={monthlyIncome || 100000}
                     step="1000"
                     value={monthlyBudgetLimit}
                     onChange={(e) => setMonthlyBudgetLimit(Number(e.target.value))}

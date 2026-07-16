@@ -24,7 +24,7 @@ export default function FinTwinApp() {
   const [tab, setTab] = useState("dashboard");
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [currency, setCurrency] = useState("₹");
+  const [currency, setCurrency] = useState("\u20B9");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [healthScore, setHealthScore] = useState(840);
   const [darkMode, setDarkMode] = useState(() => {
@@ -234,4 +234,3 @@ export default function FinTwinApp() {
     </div>
   );
 }
-

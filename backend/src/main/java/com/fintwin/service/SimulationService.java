@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,13 +22,13 @@ public class SimulationService {
     public SimulationResponse runSimulation(String userId, SimulationRequest request) {
         // 1. Generate dynamic wealth points
         List<SimulationResponse.WealthPoint> points = new ArrayList<>();
-        int currentYear = 2024;
+        int currentYear = Year.now().getValue();
         double costCr = request.getAmount() / 10000000.0;
         int eventYear = currentYear + (int) Math.round(request.getMonths() / 12.0);
 
         // Fetch real-time values from portfolio
-        double currentWealth = 6000000.0; // Default 60 Lakhs (0.6 Cr)
-        double weightedReturnRate = 10.0; // Default 10%
+        double currentWealth = 0.0; // Default 0
+        double weightedReturnRate = 8.0; // Default 8%
         
         if (userId != null && !userId.isEmpty()) {
             List<PortfolioHolding> holdings = holdingRepository.findByUserId(userId);
@@ -114,7 +115,7 @@ public class SimulationService {
         double delaySavings = round(lossAmountLakhs * 0.63, 1);
         paths.add(new SimulationResponse.OptimizedPathDto(
                 "Delay by 12 Months",
-                "Recovers ₹" + delaySavings + "L of projected loss by allowing corpus growth.",
+                "Recovers \u20B9" + delaySavings + "L of projected loss by allowing corpus growth.",
                 "TrendingUp"
         ));
         paths.add(new SimulationResponse.OptimizedPathDto(

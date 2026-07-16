@@ -34,45 +34,65 @@ public class InsightsController {
 
         // Load user data or use defaults
         RetirementProfile profile = retirementProfileRepository.findByUserId(userId)
-                .orElseGet(() -> new RetirementProfile(null, userId, 120000000.0, 4800000.0, 0.06, 0.08));
+                .orElseGet(() -> new RetirementProfile(null, userId, 0.0, 0.0, 0.06, 0.08));
 
         UserSettings settings = userSettingsRepository.findByUserId(userId)
-                .orElseGet(() -> new UserSettings(null, userId, "₹", 60, 42, 65.0, 25.0, 5.0, 5.0));
+                .orElseGet(() -> new UserSettings(null, userId, "\u20B9", 60, 30, 0.0, 0.0, 0.0, 0.0));
 
         List<SimulationScenario> scenarios = simulationScenarioRepository.findByUserId(userId);
 
         // 1. Safe Withdrawal Rate (SWR) check
-        double withdrawalRate = (profile.getStartingWithdrawal() / profile.getStartingCorpus()) * 100.0;
-        // Simple formula: equity allocation scales SWR from 2.5% to 4.5%
-        double safeWithdrawalRate = (settings.getEquityAllocation() * 0.04 / 65.0) + 0.015;
-        
-        // Round values to 2 decimal places
-        withdrawalRate = Math.round(withdrawalRate * 100.0) / 100.0;
-        safeWithdrawalRate = Math.round(safeWithdrawalRate * 100.0) / 100.0;
-
-        if (withdrawalRate > safeWithdrawalRate) {
+        if (profile.getStartingCorpus() <= 0.0 || profile.getStartingWithdrawal() <= 0.0) {
             insights.add(new Insight(
-                    "Withdrawal Rate Exceeds Safe Limit",
-                    "Your planned annual withdrawal rate of " + withdrawalRate + "% exceeds the recommended Safe Withdrawal Rate (SWR) of " + safeWithdrawalRate + "% based on your portfolio mix.",
-                    "warning",
-                    "High Risk",
+                    "Setup Retirement Targets",
+                    "Please configure your retirement starting corpus and withdrawal needs to analyze safe withdrawal rate sustainability.",
+                    "info",
+                    "No Data",
                     "Retirement",
-                    "Consider lowering your initial annual withdrawal or increasing starting assets."
+                    "Go to the Retirement Planning tab and set your targets."
             ));
         } else {
-            insights.add(new Insight(
-                    "Withdrawal Rate is Sustainable",
-                    "Your planned annual withdrawal rate of " + withdrawalRate + "% is within the recommended safe limit of " + safeWithdrawalRate + "% for your asset mix.",
-                    "success",
-                    "Optimal",
-                    "Retirement",
-                    "Maintain your planned retirement budget."
-            ));
+            double withdrawalRate = (profile.getStartingWithdrawal() / profile.getStartingCorpus()) * 100.0;
+            // Simple formula: equity allocation scales SWR from 2.5% to 4.5%
+            double safeWithdrawalRate = ((settings.getEquityAllocation() * 0.04 / 65.0) + 0.015) * 100.0;
+            
+            // Round values to 2 decimal places
+            withdrawalRate = Math.round(withdrawalRate * 100.0) / 100.0;
+            safeWithdrawalRate = Math.round(safeWithdrawalRate * 100.0) / 100.0;
+
+            if (withdrawalRate > safeWithdrawalRate) {
+                insights.add(new Insight(
+                        "Withdrawal Rate Exceeds Safe Limit",
+                        "Your planned annual withdrawal rate of " + withdrawalRate + "% exceeds the recommended Safe Withdrawal Rate (SWR) of " + safeWithdrawalRate + "% based on your portfolio mix.",
+                        "warning",
+                        "High Risk",
+                        "Retirement",
+                        "Consider lowering your initial annual withdrawal or increasing starting assets."
+                ));
+            } else {
+                insights.add(new Insight(
+                        "Withdrawal Rate is Sustainable",
+                        "Your planned annual withdrawal rate of " + withdrawalRate + "% is within the recommended safe limit of " + safeWithdrawalRate + "% for your asset mix.",
+                        "success",
+                        "Optimal",
+                        "Retirement",
+                        "Maintain your planned retirement budget."
+                ));
+            }
         }
 
         // 2. Asset Allocation Volatility check
         double equity = settings.getEquityAllocation();
-        if (equity > 75.0) {
+        if (settings.getEquityAllocation() == 0.0 && settings.getDebtAllocation() == 0.0 && settings.getGoldAllocation() == 0.0 && settings.getRealEstateAllocation() == 0.0) {
+            insights.add(new Insight(
+                    "Configure Target Asset Allocation",
+                    "You have not configured your target asset allocation yet.",
+                    "info",
+                    "No Target",
+                    "Allocation",
+                    "Go to Settings to define your target equity, debt, gold, and real estate allocations."
+            ));
+        } else if (equity > 75.0) {
             insights.add(new Insight(
                     "High Equity Volatility Buffer",
                     "Your equity exposure is high (" + equity + "%). While this optimizes capital growth, it makes the portfolio highly vulnerable to market drawdowns.",

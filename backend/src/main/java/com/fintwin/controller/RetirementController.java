@@ -37,8 +37,8 @@ public class RetirementController {
                     RetirementProfile defaultProfile = new RetirementProfile(
                             null,
                             userId,
-                            120000000.0, // 12 Cr
-                            4800000.0,   // 48L
+                            0.0, // starting corpus
+                            0.0, // starting withdrawal
                             0.06,        // 6%
                             0.08         // 8%
                     );
@@ -88,7 +88,7 @@ public class RetirementController {
         double goldVal = 5.0;
         double reVal = 5.0;
 
-        if (userId != null) {
+        if (userId != null && !userId.isEmpty()) {
             Optional<UserSettings> settingsOpt = userSettingsRepository.findByUserId(userId);
             if (settingsOpt.isPresent()) {
                 UserSettings s = settingsOpt.get();

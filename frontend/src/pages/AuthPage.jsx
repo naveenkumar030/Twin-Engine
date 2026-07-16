@@ -203,6 +203,15 @@ export default function AuthPage({ onLoginSuccess }) {
               "SIGN IN"
             )}
           </button>
+
+          {/* Guest Mode Bypass Button */}
+          <button
+            type="button"
+            onClick={() => onLoginSuccess({ id: "guest", email: "guest@fintwin.com", username: "GuestUser" })}
+            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-sm py-4 rounded-2xl transition-all border border-slate-200 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 flex justify-center items-center gap-2 mt-2 cursor-pointer"
+          >
+            GUEST ACCESS (DEMO MODE)
+          </button>
         </form>
 
         {/* Toggle link */}

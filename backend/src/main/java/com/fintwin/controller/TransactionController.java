@@ -64,12 +64,19 @@ public class TransactionController {
                 else if (h.contains("type")) typeIdx = i;
             }
 
-            // Fallbacks if headers don't match standard names or are missing
-            if (dateIdx == -1) dateIdx = 0;
-            if (descIdx == -1) descIdx = 1;
-            if (catIdx == -1) catIdx = 2;
-            if (amtIdx == -1) amtIdx = 3;
-            if (typeIdx == -1) typeIdx = 4;
+            // Safe fallbacks to prevent index collisions
+            Set<Integer> usedIndices = new HashSet<>();
+            if (dateIdx != -1) usedIndices.add(dateIdx);
+            if (descIdx != -1) usedIndices.add(descIdx);
+            if (catIdx != -1) usedIndices.add(catIdx);
+            if (amtIdx != -1) usedIndices.add(amtIdx);
+            if (typeIdx != -1) usedIndices.add(typeIdx);
+
+            if (dateIdx == -1) { dateIdx = findUnusedIndex(usedIndices, 0); usedIndices.add(dateIdx); }
+            if (descIdx == -1) { descIdx = findUnusedIndex(usedIndices, 1); usedIndices.add(descIdx); }
+            if (catIdx == -1) { catIdx = findUnusedIndex(usedIndices, 2); usedIndices.add(catIdx); }
+            if (amtIdx == -1) { amtIdx = findUnusedIndex(usedIndices, 3); usedIndices.add(amtIdx); }
+            if (typeIdx == -1) { typeIdx = findUnusedIndex(usedIndices, 4); usedIndices.add(typeIdx); }
 
             List<Transaction> transactionsToSave = new ArrayList<>();
             String line;
@@ -150,5 +157,13 @@ public class TransactionController {
         Map<String, String> map = new HashMap<>();
         map.put("message", message);
         return map;
+    }
+
+    private int findUnusedIndex(Set<Integer> used, int preferred) {
+        int idx = preferred;
+        while (used.contains(idx)) {
+            idx++;
+        }
+        return idx;
     }
 }

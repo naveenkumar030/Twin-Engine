@@ -90,23 +90,23 @@ const CustomTooltip = ({ active, payload, label, currency = "₹" }) => {
     const diffColorClass = difference >= 0 ? "text-emerald-400 font-bold" : "text-rose-500 font-bold";
 
     return (
-      <div className="bg-[#0c1322]/95 backdrop-blur-md border border-[#17253f] rounded-2xl p-4 shadow-2xl text-xs font-semibold pointer-events-none min-w-[200px] text-white">
-        <div className="text-slate-400 uppercase tracking-widest text-[10px] font-bold mb-2">Year {label}</div>
-        <div className="space-y-1.5 text-slate-200">
+      <div className="bg-[var(--bg-card)]/95 backdrop-blur-md border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl text-xs font-semibold pointer-events-none min-w-[200px] text-[var(--text-primary)]">
+        <div className="text-[var(--text-secondary)] uppercase tracking-widest text-[10px] font-bold mb-2">Year {label}</div>
+        <div className="space-y-1.5 text-[var(--text-primary)]">
           <div className="flex justify-between items-center gap-6">
-            <span className="text-slate-400 font-medium">Baseline</span>
-            <span className="font-extrabold text-white">₹{baseline.toFixed(2)} Cr</span>
+            <span className="text-[var(--text-secondary)] font-medium">Baseline</span>
+            <span className="font-extrabold text-[var(--text-primary)]">₹{baseline.toFixed(2)} Cr</span>
           </div>
           <div className="flex justify-between items-center gap-6">
-            <span className="text-slate-400 font-medium">Scenario</span>
-            <span className="font-extrabold text-white">₹{simulated.toFixed(2)} Cr</span>
+            <span className="text-[var(--text-secondary)] font-medium">Scenario</span>
+            <span className="font-extrabold text-[var(--text-primary)]">₹{simulated.toFixed(2)} Cr</span>
           </div>
-          <div className="border-t border-[#17253f] my-1 pt-1.5 flex justify-between items-center gap-6">
-            <span className="text-slate-400 font-medium">Difference</span>
+          <div className="border-t border-[var(--border-color)] my-1 pt-1.5 flex justify-between items-center gap-6">
+            <span className="text-[var(--text-secondary)] font-medium">Difference</span>
             <span className={diffColorClass}>{diffFormatted}</span>
           </div>
           <div className="flex justify-between items-center gap-6">
-            <span className="text-slate-400 font-medium">Change</span>
+            <span className="text-[var(--text-secondary)] font-medium">Change</span>
             <span className={diffColorClass}>{pctFormatted}</span>
           </div>
         </div>
@@ -197,10 +197,10 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
         };
       }
     }
-    // Fallback baseline: 60 Lakhs (0.6 Cr) compounding at 10%
+    // Fallback baseline: 0 wealth compounding at 8%
     return {
-      currentWealth: 6000000.0,
-      weightedReturnRate: 10.0,
+      currentWealth: 0.0,
+      weightedReturnRate: 8.0,
     };
   }, [holdings]);
 
@@ -753,7 +753,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
   return (
     <>
       <Header title="What-If Simulator" onMenuToggle={onMenuToggle} healthScore={healthScore} />
-      <main className="flex-1 p-6 md:p-10 w-full overflow-y-auto space-y-8 bg-[#050b14] text-white animate-fade-in min-h-screen">
+      <main className="flex-1 p-6 md:p-10 w-full overflow-y-auto space-y-8 bg-[var(--bg-surface)] text-[var(--text-primary)] animate-fade-in min-h-screen">
         
         {/* Floating Save Alerts */}
         <AnimatePresence>
@@ -772,10 +772,10 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
 
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-2 text-white">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-2 text-[var(--text-primary)]">
               What-If Simulator
             </h2>
-            <p className="max-w-2xl text-sm text-slate-400">
+            <p className="max-w-2xl text-sm text-[var(--text-secondary)]">
               Compound simulated lifetime milestones dynamically on top of your personalized twin baseline in real time.
             </p>
           </div>
@@ -785,9 +785,9 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
           
           {/* CONFIGURATION COLUMN */}
           <div className="col-span-1 lg:col-span-4 space-y-6">
-            <div className="rounded-3xl border border-[#17253f] p-6 bg-[#0c1322] shadow-2xl">
+            <div className="rounded-3xl border border-[var(--border-color)] p-6 bg-[var(--bg-card)] shadow-2xl">
               
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-[#17253f] pb-4 mb-5 flex items-center gap-2">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] border-b border-[var(--border-color)] pb-4 mb-5 flex items-center gap-2">
                 <SlidersHorizontal size={14} className="text-indigo-400" />
                 Scenario Config
               </h3>
@@ -796,7 +796,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                 
                 {/* Event Selector Grid */}
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2.5">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-2.5">
                     Life Event Type
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -810,8 +810,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                           className="p-3 border rounded-2xl text-center text-xs flex flex-col items-center gap-1.5 transition-all duration-300 font-bold cursor-pointer"
                           style={
                             active
-                              ? { background: "#131f37", borderColor: "#6366F1", color: "#818cf8" }
-                              : { background: "#080e1a", borderColor: "#17253f", color: "#94a3b8" }
+                              ? { background: "var(--brand-800)", borderColor: "#6366F1", color: "#818cf8" }
+                              : { background: "var(--bg-surface)", borderColor: "var(--border-color)", color: "var(--text-secondary)" }
                           }
                         >
                           <Icon size={18} className={active ? "text-indigo-400" : "text-slate-500"} />
@@ -828,8 +828,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                           className="p-3 border rounded-2xl text-center text-xs flex flex-col items-center gap-1.5 transition-all duration-300 font-bold cursor-pointer"
                           style={
                             active
-                              ? { background: "#131f37", borderColor: "#6366F1", color: "#818cf8" }
-                              : { background: "#080e1a", borderColor: "#17253f", color: "#94a3b8" }
+                              ? { background: "var(--brand-800)", borderColor: "#6366F1", color: "#818cf8" }
+                              : { background: "var(--bg-surface)", borderColor: "var(--border-color)", color: "var(--text-secondary)" }
                           }
                         >
                           <Plus size={18} className={active ? "text-indigo-400" : "text-slate-500"} />
@@ -847,10 +847,10 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="border border-[#17253f] rounded-2xl p-4 bg-[#080e1a]/50 space-y-4 overflow-hidden"
+                      className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--bg-surface)]/50 space-y-4 overflow-hidden"
                     >
                       <div>
-                        <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+                        <label className="block text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-1.5">
                           Custom Event Label
                         </label>
                         <input
@@ -858,12 +858,12 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                           value={customName}
                           onChange={(e) => setCustomName(e.target.value)}
                           placeholder="e.g. Start Startup"
-                          className="w-full px-3 py-2 border border-[#17253f] bg-[#080e1a] rounded-xl outline-none text-xs font-semibold text-white focus:border-indigo-500"
+                          className="w-full px-3 py-2 border border-[var(--border-color)] bg-[var(--bg-surface)] rounded-xl outline-none text-xs font-semibold text-[var(--text-primary)] focus:border-indigo-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                        <label className="block text-[9px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-2">
                           Milestone Behavior
                         </label>
                         <div className="grid grid-cols-3 gap-1">
@@ -878,8 +878,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                               onClick={() => setCustomBehavior(t.key)}
                               className={`p-2 border rounded-xl text-center text-[10px] font-bold cursor-pointer transition-all duration-300 ${
                                 customBehavior === t.key
-                                  ? "bg-[#131f37] border-indigo-500 text-indigo-400"
-                                  : "bg-[#080e1a] border-[#17253f] text-slate-400 hover:border-slate-700"
+                                  ? "bg-[var(--brand-800)] border-indigo-500 text-indigo-400"
+                                  : "bg-[var(--bg-surface)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-slate-500"
                               }`}
                             >
                               {t.label}
@@ -894,7 +894,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                 {/* Estimate Amount Input Slider */}
                 <div>
                   <div className="flex justify-between items-center text-xs mb-2">
-                    <span className="font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                       Estimated Cost
                     </span>
                     <span className="font-extrabold text-indigo-400">
@@ -902,11 +902,11 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                     </span>
                   </div>
                   <div className="relative group mb-3">
-                    <span className="absolute left-4 top-3.5 font-black text-slate-500">
+                    <span className="absolute left-4 top-3.5 font-black text-[var(--text-muted)]">
                       {currency}
                     </span>
                     <input
-                      className="w-full pl-8 pr-4 py-3 border border-[#17253f] bg-[#080e1a] rounded-2xl outline-none text-sm font-extrabold transition-all focus:border-indigo-500 text-white"
+                      className="w-full pl-8 pr-4 py-3 border border-[var(--border-color)] bg-[var(--bg-surface)] rounded-2xl outline-none text-sm font-extrabold transition-all focus:border-indigo-500 text-[var(--text-primary)]"
                       type="number"
                       value={amount}
                       onChange={(e) => setAmount(Math.max(0, Number(e.target.value)))}
@@ -919,14 +919,14 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                     step={selectedEvent === "house" ? 500000 : 50000}
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full h-1.5 bg-[#080e1a] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    className="w-full h-1.5 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-indigo-500"
                   />
                 </div>
 
                 {/* Target Timeline Slider */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                       Target Timeline
                     </span>
                     <span className="font-extrabold text-indigo-400">
@@ -934,14 +934,14 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                     </span>
                   </div>
                   <input
-                    className="w-full h-1.5 bg-[#080e1a] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    className="w-full h-1.5 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-indigo-500"
                     max="120"
                     min="1"
                     type="range"
                     value={months}
                     onChange={(e) => setMonths(Number(e.target.value))}
                   />
-                  <div className="flex justify-between text-[10px] font-black text-slate-500">
+                  <div className="flex justify-between text-[10px] font-black text-[var(--text-muted)]">
                     <span>Immediate</span>
                     <span>5 Years</span>
                     <span>10 Years</span>
@@ -950,11 +950,11 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
 
                 {/* Loan & Debt Config Panel */}
                 {["house", "car", "edu"].includes(selectedEvent) && (
-                  <div className="border border-[#17253f] rounded-2xl p-4 bg-[#080e1a]/80 space-y-4">
+                  <div className="border border-[var(--border-color)] rounded-2xl p-4 bg-[var(--bg-surface)]/80 space-y-4">
                     
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-xs">
-                        <label className="font-bold text-slate-400 uppercase tracking-widest">
+                        <label className="font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                           Downpayment (%)
                         </label>
                         <span className="font-extrabold text-indigo-400">
@@ -968,13 +968,13 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                         step="5"
                         value={downpaymentPct}
                         onChange={(e) => setDownpaymentPct(Number(e.target.value))}
-                        className="w-full h-1.5 bg-[#080e1a] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="w-full h-1.5 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-indigo-500"
                       />
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-xs">
-                        <label className="font-bold text-slate-400 uppercase tracking-widest">
+                        <label className="font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                           Loan Rate (%)
                         </label>
                         <span className="font-extrabold text-indigo-400">
@@ -988,7 +988,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                         step="0.1"
                         value={loanInterestRate}
                         onChange={(e) => setLoanInterestRate(Number(e.target.value))}
-                        className="w-full h-1.5 bg-[#080e1a] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        className="w-full h-1.5 bg-[var(--bg-surface)] rounded-lg appearance-none cursor-pointer accent-indigo-500"
                       />
                     </div>
 
@@ -1021,8 +1021,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
 
             {/* SAVED SCENARIOS SIDEBAR */}
             {savedScenarios.length > 0 && (
-              <div className="rounded-3xl border border-[#17253f] p-6 bg-[#0c1322]">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+              <div className="rounded-3xl border border-[var(--border-color)] p-6 bg-[var(--bg-card)]">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-4">
                   Saved Scenarios ({savedScenarios.length})
                 </h4>
                 <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
@@ -1030,13 +1030,13 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                     <div
                       key={sc.id}
                       onClick={() => handleLoadScenario(sc)}
-                      className="p-3 border border-[#17253f] rounded-2xl flex items-center justify-between text-xs cursor-pointer hover:bg-[#131f37] hover:border-indigo-900 transition-all bg-[#080e1a] text-white"
+                      className="p-3 border border-[var(--border-color)] rounded-2xl flex items-center justify-between text-xs cursor-pointer hover:bg-[var(--bg-card)] hover:border-indigo-400 transition-all bg-[var(--bg-surface)] text-[var(--text-primary)]"
                     >
                       <div className="flex-1">
                         <span className="font-extrabold block">
                           {sc.label}
                         </span>
-                        <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                        <div className="text-[10px] text-[var(--text-muted)] font-semibold mt-0.5">
                           {formatCurrency(sc.amount, currency)} • In {sc.months} Mo
                         </div>
                       </div>
@@ -1059,27 +1059,27 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
             {/* STATS HEADER */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               
-              <div className="p-5 rounded-3xl border border-[#17253f] bg-[#0c1322] shadow-md">
+              <div className="p-5 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-md">
                 <div className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-400 mb-1 flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-indigo-500" />
                   Baseline Wealth (2044)
                 </div>
-                <div className="text-3xl font-black text-white">
+                <div className="text-3xl font-black text-[var(--text-primary)]">
                   <AnimatedCounter value={baselineFinal} prefix="₹" suffix=" Cr" decimals={2} />
                 </div>
               </div>
 
-              <div className="p-5 rounded-3xl border border-[#17253f] bg-[#0c1322] shadow-md">
+              <div className="p-5 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-md">
                 <div className="text-[9px] font-extrabold uppercase tracking-widest text-rose-400 mb-1 flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-rose-500 border border-dashed" />
                   Simulated Wealth (2044)
                 </div>
-                <div className="text-3xl font-black text-white">
+                <div className="text-3xl font-black text-[var(--text-primary)]">
                   <AnimatedCounter value={simulatedFinal} prefix="₹" suffix=" Cr" decimals={2} />
                 </div>
               </div>
 
-              <div className={`p-5 rounded-3xl border shadow-md bg-[#0c1322] ${
+              <div className={`p-5 rounded-3xl border shadow-md bg-[var(--bg-card)] ${
                 corpusChangeVal >= 0 ? "border-emerald-950/50" : "border-amber-950/50"
               }`}>
                 <div className={`text-[9px] font-extrabold uppercase tracking-widest mb-1 flex items-center gap-1.5 ${
@@ -1102,26 +1102,26 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
               ref={chartCardRef}
               whileHover={{ scale: 1.002 }}
               transition={{ duration: 0.3 }}
-              className="rounded-3xl border border-[#17253f] shadow-2xl p-6 md:p-8 flex-1 flex flex-col bg-[#0c1322]"
+              className="rounded-3xl border border-[var(--border-color)] shadow-2xl p-6 md:p-8 flex-1 flex flex-col bg-[var(--bg-card)]"
             >
               <div id="chart-header-row" className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
-                  <h3 className="text-xl font-black text-white">
+                  <h3 className="text-xl font-black text-[var(--text-primary)]">
                     20-Year Wealth Projection
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Custom digital twin wealth curve</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">Custom digital twin wealth curve</p>
                 </div>
                 
                 {/* TOOLBAR ACTIONS */}
                 <div id="chart-actions-row" className="flex flex-wrap items-center gap-3 text-xs font-extrabold">
                   {/* Dataset toggles */}
-                  <div className="flex bg-[#080e1a] rounded-xl p-0.5 border border-[#17253f]">
+                  <div className="flex bg-[var(--bg-surface)] rounded-xl p-0.5 border border-[var(--border-color)]">
                     <button
                       onClick={() => setShowBaseline(!showBaseline)}
                       className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                         showBaseline 
-                          ? "bg-[#131f37] text-indigo-400 shadow-sm" 
-                          : "text-slate-500 hover:text-slate-350"
+                          ? "bg-[var(--bg-card)] text-indigo-400 shadow-sm" 
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       }`}
                     >
                       {showBaseline ? <Eye size={12} /> : <EyeOff size={12} />}
@@ -1131,8 +1131,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                       onClick={() => setShowSimulated(!showSimulated)}
                       className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                         showSimulated 
-                          ? "bg-[#131f37] text-rose-450 shadow-sm" 
-                          : "text-slate-500 hover:text-slate-350"
+                          ? "bg-[var(--bg-card)] text-rose-500 shadow-sm" 
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       }`}
                     >
                       {showSimulated ? <Eye size={12} /> : <EyeOff size={12} />}
@@ -1144,14 +1144,14 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                   <button 
                     onClick={handleExportCSV}
                     title="Export data as CSV"
-                    className="p-2 border border-[#17253f] bg-[#080e1a] rounded-xl hover:bg-[#131f37] text-slate-300 transition-all cursor-pointer"
+                    className="p-2 border border-[var(--border-color)] bg-[var(--bg-surface)] rounded-xl hover:bg-[var(--bg-card)] text-[var(--text-secondary)] transition-all cursor-pointer"
                   >
                     <FileText size={14} />
                   </button>
                   <button 
                     onClick={handleDownloadPNG}
                     title="Export chart as PNG"
-                    className="p-2 border border-[#17253f] bg-[#080e1a] rounded-xl hover:bg-[#131f37] text-slate-300 transition-all cursor-pointer"
+                    className="p-2 border border-[var(--border-color)] bg-[var(--bg-surface)] rounded-xl hover:bg-[var(--bg-card)] text-[var(--text-secondary)] transition-all cursor-pointer"
                   >
                     <Download size={14} />
                   </button>
@@ -1180,7 +1180,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                       </filter>
                     </defs>
 
-                    <CartesianGrid stroke="#17253f" vertical={false} />
+                    <CartesianGrid stroke="var(--border-color)" vertical={false} />
                     <XAxis 
                       dataKey="year" 
                       tick={{ fontSize: 10, fill: "#64748b", fontWeight: "bold" }} 
@@ -1282,14 +1282,14 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Predicted Impact Card */}
-              <div className="rounded-3xl border border-[#17253f] p-6 relative overflow-hidden bg-[#0c1322] flex flex-col justify-between shadow-2xl">
+              <div className="rounded-3xl border border-[var(--border-color)] p-6 relative overflow-hidden bg-[var(--bg-card)] flex flex-col justify-between shadow-2xl">
                 <div className="absolute top-1/2 right-4 w-40 h-40 rounded-full bg-indigo-500/5 filter blur-3xl pointer-events-none" />
                 
                 <div>
                   <h4 className="text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-1.5 text-indigo-400">
                     <Sparkles size={14} className="animate-pulse" /> Predicted Twin Impact
                   </h4>
-                  <p className="text-sm leading-relaxed text-slate-300">
+                  <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
                     {selectedEvent === "emergency" ? (
                       <>
                         Reallocating liquidity into an emergency fund reduces asset growth rate, creating a safe drag of{" "}
@@ -1307,9 +1307,9 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                   </p>
                 </div>
 
-                <div className="mt-6 grid grid-cols-3 gap-2 border-t pt-4 border-[#17253f]">
-                  <div className="p-2.5 rounded-xl border border-[#17253f] text-center bg-[#080e1a]/85">
-                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider leading-none mb-1.5 h-6 flex items-center justify-center">
+                <div className="mt-6 grid grid-cols-3 gap-2 border-t pt-4 border-[var(--border-color)]">
+                  <div className="p-2.5 rounded-xl border border-[var(--border-color)] text-center bg-[var(--bg-surface)]/85">
+                    <div className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider leading-none mb-1.5 h-6 flex items-center justify-center">
                       Retirement Age
                     </div>
                     <div className={`text-base font-black ${impact.retirementAgeDeltaYears > 0 ? "text-rose-500" : "text-emerald-400"}`}>
@@ -1320,8 +1320,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                     </div>
                   </div>
 
-                  <div className="p-2.5 rounded-xl border border-[#17253f] text-center bg-[#080e1a]/85">
-                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider leading-none mb-1.5 h-6 flex items-center justify-center">
+                  <div className="p-2.5 rounded-xl border border-[var(--border-color)] text-center bg-[var(--bg-surface)]/85">
+                    <div className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider leading-none mb-1.5 h-6 flex items-center justify-center">
                       Liquidity Risk
                     </div>
                     <div className={`text-sm font-black pt-1 ${
@@ -1331,8 +1331,8 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                     </div>
                   </div>
 
-                  <div className="p-2.5 rounded-xl border border-[#17253f] text-center bg-[#080e1a]/85">
-                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-wider leading-none mb-1.5 h-6 flex items-center justify-center">
+                  <div className="p-2.5 rounded-xl border border-[var(--border-color)] text-center bg-[var(--bg-surface)]/85">
+                    <div className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider leading-none mb-1.5 h-6 flex items-center justify-center">
                       Recovery Time
                     </div>
                     <div className="text-sm font-black text-emerald-400 pt-1">
@@ -1341,9 +1341,9 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between text-[10px] font-bold text-slate-500 bg-[#080e1a]/60 p-2.5 rounded-xl">
+                <div className="mt-4 flex items-center justify-between text-[10px] font-bold text-[var(--text-muted)] bg-[var(--bg-surface)]/60 p-2.5 rounded-xl">
                   <span>Quality of Life Rating:</span>
-                  <span className="text-white font-extrabold text-xs">
+                  <span className="text-[var(--text-primary)] font-extrabold text-xs">
                     {impact.qualityOfLifeScore} / 100
                   </span>
                 </div>
@@ -1351,7 +1351,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
 
               {/* Optimized Path Recommendations */}
               <div className="space-y-3 flex flex-col justify-between">
-                <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 pl-1">
+                <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] pl-1">
                   Optimized Action Recommendations
                 </h4>
                 
@@ -1363,7 +1363,7 @@ export default function SimulatorPage({ userId, currency = "₹", onMenuToggle, 
                       title={path.title} 
                       desc={path.desc} 
                       icon={IconComp} 
-                      theme="dark"
+                      theme="light"
                     />
                   );
                 })}

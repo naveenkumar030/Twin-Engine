@@ -8,8 +8,19 @@
    CSS CUSTOM PROPERTIES - DESIGN SYSTEM
    ============================================ */
 :root {
+  --brand-50: #a9d6e5;
+  --brand-100: #89c2d9;
+  --brand-200: #61a5c2;
+  --brand-300: #468faf;
+  --brand-400: #2c7da0;
+  --brand-500: #2a6f97;
+  --brand-600: #014f86;
+  --brand-700: #01497c;
+  --brand-800: #013a63;
+  --brand-900: #012a4a;
+
   --color-primary: #0f172a;
-  --color-secondary: #6366f1;
+  --color-secondary: var(--brand-500);
   --color-accent: #8b5cf6;
   --color-success: #10b981;
   --color-warning: #f59e0b;
@@ -31,12 +42,12 @@
   --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
   --shadow-lg: 0 8px 25px rgba(0,0,0,0.08);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.10);
-  --shadow-glow: 0 0 30px rgba(99,102,241,0.15);
+  --shadow-glow: 0 0 30px rgba(42, 111, 151, 0.15);
 }
 
 .dark {
   --color-primary: #f1f5f9;
-  --color-secondary: #818cf8;
+  --color-secondary: var(--brand-400);
   --color-accent: #a78bfa;
   --color-success: #34d399;
   --color-warning: #fbbf24;
@@ -58,7 +69,7 @@
   --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
   --shadow-lg: 0 8px 25px rgba(0,0,0,0.4);
   --shadow-xl: 0 16px 40px rgba(0,0,0,0.5);
-  --shadow-glow: 0 0 30px rgba(129,140,248,0.2);
+  --shadow-glow: 0 0 30px rgba(44, 125, 160, 0.2);
 }
 
 /* ============================================
@@ -120,7 +131,7 @@
    GRADIENT UTILITIES
    ============================================ */
 .gradient-indigo {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: linear-gradient(135deg, #2a6f97, #014f86);
 }
 
 .gradient-emerald {
